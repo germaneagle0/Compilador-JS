@@ -1,5 +1,117 @@
 'use strict';
 
+let error = false;
+
+const showError = (msg) => {
+	console.error(msg);
+};
+
+const codeHasError = (boolean) => {
+	error = boolean;
+	const codeElem = document.getElementById('code');
+
+	if (boolean && !codeElem.classList.contains('error')) {
+		document.getElementById('code').classList.add('error');
+	}
+	if (!boolean && codeElem.classList.contains('error')) {
+		document.getElementById('code').classList.remove('error');
+	}
+};
+
+const putChar = (elem, text) => {
+	elem.value =
+		elem.value.substring(0, codeElem.selectionStart) +
+		text +
+		elem.value.substring(codeElem.selectionStart);
+};
+
+const action = (fn) => {
+	setTimeout(() => {
+		fn();
+	}, 0);
+};
+
+const checkWhileError = (error) => {
+	if (error) {
+		console.log('enter');
+		try {
+			prettier.format(codeElem.value, {
+				parser: 'babel',
+				plugins: prettierPlugins,
+			});
+			codeHasError(false);
+		} catch (e) {
+			codeHasError(true);
+			return;
+		}
+	}
+};
+
+const tabRule = (e) => {
+	if (e.key === 'Tab') {
+		e.preventDefault();
+		const start = codeElem.selectionStart;
+		const end = codeElem.selectionEnd;
+		codeElem.value =
+			codeElem.value.substring(0, start) + '\t' + codeElem.value.substring(end);
+		codeElem.selectionStart = codeElem.selectionEnd = start + 1;
+	}
+};
+
+const enterRule = (e) => {
+	if (e.key === 'Enter') {
+		try {
+			const lastKey = codeElem.value[codeElem.selectionStart - 1];
+			if (lastKey === '{' || lastKey === '(' || lastKey === '[') {
+				action(() => {
+					const last = codeElem.selectionStart - 1;
+					putChar(codeElem, '\n');
+					codeElem.selectionStart = codeElem.selectionEnd = last + 1;
+				});
+				return;
+			}
+			codeElem.value = prettier.format(codeElem.value, {
+				parser: 'babel',
+				plugins: prettierPlugins,
+			});
+			codeHasError(false);
+		} catch (e) {
+			codeHasError(true);
+			showError(e);
+		}
+	}
+};
+
+const tagRule = (e) => {
+	if (e.key === '{' || e.key === '(' || e.key === '[') {
+		action(() => {
+			const location = codeElem.selectionEnd;
+			const newKey = e.key === '{' ? '}' : e.key === '(' ? ')' : ']';
+			putChar(codeElem, newKey);
+			codeElem.selectionEnd = codeElem.selectionStart = location;
+		});
+	}
+};
+
+const stringRule = (e) => {
+	if (e.key === "'" || e.key === '"') {
+		action(() => {
+			const location = codeElem.selectionEnd;
+			putChar(codeElem, e.key);
+			codeElem.selectionEnd = codeElem.selectionStart = location;
+		});
+	}
+};
+
+const codeElem = document.getElementById('code');
+codeElem.addEventListener('keydown', (e) => {
+	checkWhileError(error);
+	tabRule(e);
+	enterRule(e);
+	tagRule(e);
+	stringRule(e);
+});
+
 let counter = 1;
 
 let logs = [];
@@ -55,6 +167,7 @@ const runUserJavascript = () => {
 	let userScript = document.getElementById('code').value;
 	userScript = userScript.replaceAll(/console.log/g, 'printLog');
 	userScript = userScript.replaceAll(/console.error/g, 'printError');
+	userScript = userScript.replaceAll(/(?<![\w\d])var(?![\w\d])/g, 'let');
 	try {
 		if (userScript.includes('document')) {
 			throw 'You are not allowed to use document';
