@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Run JavaScript!</title>
+		<link rel="stylesheet" href="runJS.css" />
+		<script src="runJS.js"></script>
+	</head>
+	<body style="display: flex; flex-direction: column">
+		<h1>Run JavaScript!</h1>
+		<div class="flex">
+			<form spellcheck="false">
+				<textarea
+					name="code"
+					id="code"
+					placeholder="// Escreva aqui seu codigo em JS"
+				></textarea>
+			</form>
+			<div class="resultado">
+				<h2>Resultado</h2>
+				<div class="resultContainer">
+					<div id="resultado"></div>
+				</div>
+			</div>
+		</div>
+		<div class="flex-button">
+			<div class="button-group flex-button">
+				<button onclick="runUserJavascript()">RUN</button>
+				<button onclick="loadJS()">LOAD</button>
+				<button onclick="saveJS()">SAVE</button>
+			</div>
+			<div class="button-group flex-button">
+				<button onclick="clearLogs()">CLEAR LOGS</button>
+				<button onclick="saveLogs()">SAVE LOG</button>
+			</div>
+		</div>
+	</body>
+</html>
